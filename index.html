@@ -158,6 +158,10 @@ body {
       <button class="filter-btn" data-filter="Rendah">Rendah</button>
     </div>
 
+    <!-- KOTAK ANALISIS YANG TADI KITA TAMBAHKAN -->
+    <div class="list-title" style="background:#e0f2fe; color:#0369a1;">📊 Analisis Sampah vs Penduduk</div>
+    <div id="analysis-panel" style="padding: 12px; font-size: 12px; background: white; border-bottom: 1px solid #e2e8f0;"></div>
+
     <div class="list-title">Daftar Lokasi</div>
     <div class="list" id="list"></div>
   </aside>
@@ -179,43 +183,48 @@ const dataTitik = [
     lat: 0.5431, lng: 123.0612,
     jenis: "Plastik & Campuran",
     kritis: "Tinggi",
-    alamat: "Kec. Kota Tengah, Gorontalo",
+    alamat: "Kec. Kota Tengah",
+    wilayah: "Kota Gorontalo",
     catatan: "Sampah menumpuk di pinggir jalan pasar",
     foto: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400"
   },
   {
-    nama: "Bank Sampah UNG",
-    lat: 0.5581, lng: 123.0561,
+    nama: "TPS Pasar Limboto",
+    lat: 0.6250, lng: 122.9800,
     jenis: "Kertas & Botol",
     kritis: "Sedang",
-    alamat: "Kec. Sipatana, Gorontalo",
+    alamat: "Kec. Limboto",
+    wilayah: "Kab. Gorontalo",
     catatan: "Butuh penambahan armada angkut",
     foto: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=400"
   },
   {
-    nama: "Sudut Jalan Gorontalo Mall",
-    lat: 0.5428, lng: 123.0572,
+    nama: "Sudut Jalan Suwawa",
+    lat: 0.5300, lng: 123.2000,
     jenis: "Kemasan Makanan",
     kritis: "Tinggi",
-    alamat: "Kec. Kota Selatan, Gorontalo",
+    alamat: "Kec. Suwawa",
+    wilayah: "Bone Bolango",
     catatan: "Banyak sampah berserakan di trotoar",
     foto: "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=400"
   },
   {
-    nama: "TPS Jl. Ahmad Yani",
-    lat: 0.5350, lng: 123.0600,
+    nama: "TPS Tilamuta",
+    lat: 0.6300, lng: 122.3500,
     jenis: "Plastik",
     kritis: "Rendah",
-    alamat: "Kec. Kota Timur, Gorontalo",
+    alamat: "Kec. Tilamuta",
+    wilayah: "Boalemo",
     catatan: "Sudah rutin diangkut",
     foto: "https://images.unsplash.com/photo-1621451537084-482c73073a0f?w=400"
   },
   {
-    nama: "Titik Krisis Botu",
-    lat: 0.5100, lng: 123.0500,
+    nama: "Titik Krisis Marisa",
+    lat: 0.4600, lng: 121.9400,
     jenis: "Campuran",
-    kritis: "Tinggi",
-    alamat: "Kec. Dumbo Raya, Gorontalo",
+    kritis: "Sedang",
+    alamat: "Kec. Marisa",
+    wilayah: "Pohuwato",
     catatan: "Belum ada bak sampah permanen",
     foto: "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?w=400"
   }
@@ -320,7 +329,64 @@ document.getElementById('menuBtn').onclick = () => {
   document.getElementById('menuBtn').textContent = sb.classList.contains('open') ? '✕' : '☰';
 };
 
-renderSemua();
+/* ================================================
+   LOGIKA ANALISIS PENDUDUK VS SAMPAH
+   ================================================ */
+const dataPenduduk = {
+  "Kota Gorontalo": 207808,
+  "Kab. Gorontalo": 409509,
+  "Bone Bolango": 170649,
+  "Pohuwato": 153770,
+  "Boalemo": 153274,
+  "Gorontalo Utara": 132784
+};
+
+function renderAnalisis() {
+  const panel = document.getElementById('analysis-panel');
+  panel.innerHTML = '';
+  
+  // Hitung skor sampah per wilayah (Tinggi=3, Sedang=2, Rendah=1)
+  let skorSampah = {};
+  dataTitik.forEach(t => {
+    let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1);
+    skorSampah[t.wilayah] = (skorSampah[t.wilayah] || 0) + nilai;
+  });
+
+  // Tampilkan hasil
+  for (let wilayah in skorSampah) {
+    let penduduk = dataPenduduk[wilayah] || 0;
+    let skor = skorSampah[wilayah];
+    
+    // Rumus rasio: Skor Sampah / (Penduduk / 100.000)
+    // Semakin tinggi rasionya, semakin "bermasalah" wilayah itu
+    let rasio = (skor / (penduduk / 100000)).toFixed(2);
+    
+    // Tentukan warna peringatan
+    let warna = rasio > 1.5 ? '#ef4444' : (rasio > 0.5 ? '#f59e0b' : '#10b981');
+    let status = rasio > 1.5 ? 'Waspada' : (rasio > 0.5 ? 'Pantau' : 'Aman');
+
+    panel.innerHTML += `
+      <div style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #cbd5e1;">
+        <div style="font-weight: bold; color: #0f172a; margin-bottom: 4px;">${wilayah}</div>
+        <div style="display: flex; justify-content: space-between; color: #64748b; margin-bottom: 2px;">
+          <span>Penduduk:</span> <b>${penduduk.toLocaleString('id-ID')} jiwa</b>
+        </div>
+        <div style="display: flex; justify-content: space-between; color: #64748b; margin-bottom: 4px;">
+          <span>Skor Krisis Sampah:</span> <b>${skor} poin</b>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 4px 8px; border-radius: 6px;">
+          <span>Rasio:</span>
+          <span style="color: ${warna}; font-weight: bold;">${rasio} (${status})</span>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Panggil fungsi analisis saat pertama kali dimuat
+renderAnalisis();  
+
+  renderSemua();
 </script>
 </body>
 </html>
