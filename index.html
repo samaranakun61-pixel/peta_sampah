@@ -175,48 +175,48 @@ body {
    ================================================ */
 const dataTitik = [
   {
-    nama: "Bank Sampah Induk Iloheluma",
-    lat: 0.570838, lng: 123.052170,
-    jenis: "Plastik",
+    nama: "TPS Pasar Sentral",
+    lat: 0.5431, lng: 123.0612,
+    jenis: "Plastik & Campuran",
     kritis: "Tinggi",
-    alamat: "Jl. Merdeka No. 10",
-    catatan: "Menumpuk 3 hari, bau menyengat",
+    alamat: "Kec. Kota Tengah, Gorontalo",
+    catatan: "Sampah menumpuk di pinggir jalan pasar",
     foto: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400"
   },
   {
-    nama: "Bank Sampah RW 05",
-    lat: -6.2050, lng: 106.8200,
-    jenis: "Kertas & Kardus",
+    nama: "Bank Sampah UNG",
+    lat: 0.5581, lng: 123.0561,
+    jenis: "Kertas & Botol",
     kritis: "Sedang",
-    alamat: "Jl. Melati RW 05",
-    catatan: "Perlu sortir ulang",
+    alamat: "Kec. Sipatana, Gorontalo",
+    catatan: "Butuh penambahan armada angkut",
     foto: "https://images.unsplash.com/photo-1604187351574-c75ca79f5807?w=400"
   },
   {
-    nama: "Sudut Pasar Baru",
-    lat: -6.1950, lng: 106.8100,
-    jenis: "Kaleng & Logam",
+    nama: "Sudut Jalan Gorontalo Mall",
+    lat: 0.5428, lng: 123.0572,
+    jenis: "Kemasan Makanan",
     kritis: "Tinggi",
-    alamat: "Pasar Baru Blok C",
-    catatan: "Belum diangkut seminggu",
+    alamat: "Kec. Kota Selatan, Gorontalo",
+    catatan: "Banyak sampah berserakan di trotoar",
     foto: "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=400"
   },
   {
-    nama: "TPS Kelurahan",
-    lat: -6.2100, lng: 106.8250,
+    nama: "TPS Jl. Ahmad Yani",
+    lat: 0.5350, lng: 123.0600,
     jenis: "Plastik",
     kritis: "Rendah",
-    alamat: "Jl. Kenanga No. 3",
-    catatan: "Sudah ditangani",
+    alamat: "Kec. Kota Timur, Gorontalo",
+    catatan: "Sudah rutin diangkut",
     foto: "https://images.unsplash.com/photo-1621451537084-482c73073a0f?w=400"
   },
   {
-    nama: "Depan SDN 01",
-    lat: -6.1980, lng: 106.8220,
+    nama: "Titik Krisis Botu",
+    lat: 0.5100, lng: 123.0500,
     jenis: "Campuran",
-    kritis: "Sedang",
-    alamat: "Jl. Pendidikan No. 1",
-    catatan: "Banyak botol plastik",
+    kritis: "Tinggi",
+    alamat: "Kec. Dumbo Raya, Gorontalo",
+    catatan: "Belum ada bak sampah permanen",
     foto: "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?w=400"
   }
 ];
@@ -224,7 +224,7 @@ const dataTitik = [
    ⛔ DI BAWAH INI JANGAN DIUBAH
    ================================================ */
 
-const map = L.map('map', { zoomControl: false }).setView([-6.2, 106.816], 14);
+const map = L.map('map', { zoomControl: false }).setView([0.543, 123.056], 13);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap', maxZoom: 19
