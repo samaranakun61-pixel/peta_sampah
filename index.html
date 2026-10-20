@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <title>Peta Krisis Sampah Gorontalo</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -12,9 +12,11 @@
 <style>
 :root { --hijau: #10b981; --kuning: #f59e0b; --merah: #ef4444; --bg: #f1f5f9; --card: #ffffff; --teks: #0f172a; --teks-muted: #64748b; --primary: #059669; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--teks); height: 100vh; overflow: hidden; }
-#app { display: flex; height: 100vh; width: 100%; }
-#sidebar { width: 340px; background: var(--card); box-shadow: 4px 0 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; z-index: 1000; transition: transform 0.3s; }
+html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--teks); }
+#app { display: flex; height: 100vh; height: 100dvh; width: 100vw; position: relative; overflow: hidden; }
+
+#sidebar { width: 340px; background: var(--card); box-shadow: 4px 0 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; z-index: 9999 !important; transition: transform 0.3s; height: 100%; }
 .brand { padding: 20px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; }
 .brand h1 { font-size: 18px; font-weight: 700; }
 .brand p { font-size: 12px; opacity: 0.9; margin-top: 4px; }
@@ -24,51 +26,93 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .stat:nth-child(3) { border-top-color: var(--hijau); }
 .stat-num { font-size: 20px; font-weight: 700; }
 .stat-label { font-size: 10px; color: var(--teks-muted); text-transform: uppercase; margin-top: 2px; }
-.filters { padding: 12px 16px; display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid #e2e8f0; }
+.filters { padding: 12px 16px 8px 16px; display: flex; gap: 8px; flex-wrap: wrap; }
 .filter-btn { padding: 6px 12px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: white; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--teks-muted); }
 .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+.search-box { padding: 0 16px 12px 16px; border-bottom: 1px solid #e2e8f0; }
+.search-box input { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; margin-bottom: 8px; }
+.search-box select { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; background: white; }
+
+#btnHeatmap { background: #f97316; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 0 16px 10px 16px; text-align: center; transition: all 0.3s; }
+
 .list-title { padding: 10px 16px; font-size: 11px; font-weight: 700; color: var(--teks-muted); text-transform: uppercase; background: #f8fafc; }
-.list { flex: 1; overflow-y: auto; padding: 8px; }
-.item { padding: 12px; border-radius: 10px; background: white; margin-bottom: 8px; cursor: pointer; border: 1px solid #e2e8f0; }
-.item:hover { border-color: var(--primary); }
+
+/* PERBAIKAN: Daftar Lokasi mengambil porsi 2/3 ruang, min-height 150px */
+.list { flex: 2; overflow-y: auto; padding: 8px; min-height: 150px; }
+
+.item { padding: 12px; border-radius: 10px; background: white; margin-bottom: 8px; border: 1px solid #e2e8f0; }
 .item-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-.item-meta { font-size: 11px; color: var(--teks-muted); display: flex; gap: 8px; }
+.item-meta { font-size: 11px; color: var(--teks-muted); display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
 .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; color: white; }
 .badge.tinggi { background: var(--merah); }
 .badge.sedang { background: var(--kuning); }
 .badge.rendah { background: var(--hijau); }
-#map { flex: 1; height: 100vh; }
+.badge-status { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+.status-belum { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.status-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.status-pending { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+
+#map { flex: 1; height: 100%; width: 100%; z-index: 1 !important; }
+
+.btn-lihat { width: 100%; padding: 8px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; margin-bottom: 4px; }
+.btn-admin-edit { background: #fef08a; color: #854d0e; border: 1px solid #fde047; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+.btn-admin-hapus { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+.btn-admin-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+.btn-admin-acc { background: #3b82f6; color: white; border: 1px solid #2563eb; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+.admin-actions { display: flex; gap: 6px; margin-top: 4px; }
+
+/* STYLE TITIK BULAT BERKEDIP */
 .custom-div-icon { background: none !important; border: none !important; }
-.marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 3px 8px rgba(0,0,0,0.3); border: 3px solid white; }
-.marker-pin::after { content: ''; width: 10px; height: 10px; background: white; border-radius: 50%; margin: 7px; }
-.marker-pin.tinggi { background: var(--merah); }
-.marker-pin.sedang { background: var(--kuning); }
-.marker-pin.rendah { background: var(--hijau); }
+.marker-pulse { width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; }
+.marker-pulse.tinggi { background: var(--merah); animation: pulse-merah 1.5s infinite; }
+.marker-pulse.sedang { background: var(--kuning); animation: pulse-kuning 1.5s infinite; }
+.marker-pulse.rendah { background: var(--hijau); animation: pulse-hijau 1.5s infinite; }
+.marker-pulse.pending { background: #94a3b8; animation: none; }
+
+@keyframes pulse-merah { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+@keyframes pulse-kuning { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
+@keyframes pulse-hijau { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
 .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; overflow: hidden; }
 .leaflet-popup-content { margin: 0; }
+.popup-img { width: 100%; height: 140px; object-fit: cover; background: #e2e8f0; display: block; }
 .popup-body { padding: 12px; }
 .popup-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
 .popup-row { font-size: 12px; color: var(--teks-muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
-#menuBtn { display: none; position: absolute; top: 16px; left: 16px; z-index: 1001; background: white; border: none; width: 44px; height: 44px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; font-size: 20px; }
+
+#menuBtn { display: none; position: absolute; top: 16px; left: 16px; z-index: 10000 !important; background: white; border: none; width: 44px; height: 44px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; font-size: 20px; }
+
 @media (max-width: 768px) {
-  #sidebar { position: absolute; top: 0; left: 0; height: 100vh; transform: translateX(-100%); }
+  #sidebar { position: absolute; top: 0; left: 0; height: 100%; transform: translateX(-100%); }
   #sidebar.open { transform: translateX(0); }
   #menuBtn { display: flex; align-items: center; justify-content: center; }
   .brand { padding-left: 70px; }
+  #sidebar.open ~ #laporBtn { display: none; } 
 }
 
-/* STYLE UNTUK FORM LAPORAN (MODAL) */
-#laporBtn { position: absolute; bottom: 30px; right: 30px; z-index: 1000; background: var(--merah); color: white; border: none; padding: 15px 25px; border-radius: 30px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 8px; }
-#modalLapor { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-.modal-content { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+#laporBtn { position: absolute; bottom: 30px; right: 30px; z-index: 9999 !important; background: var(--merah); color: white; border: none; padding: 15px 25px; border-radius: 30px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+#qrBtnSidebar { background: #0ea5e9; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin: 5px 16px; text-align: center; }
+#adminBtnSidebar { background: #64748b; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin: 5px 16px; text-align: center; }
+#adminPendudukBtn { display: none; background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin: 5px 16px; text-align: center; }
+
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001 !important; align-items: center; justify-content: center; padding: 20px; }
+.modal-content { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; }
 .modal-content h2 { font-size: 18px; margin-bottom: 15px; color: var(--teks); }
-.form-group { margin-bottom: 12px; }
+.form-group { margin-bottom: 12px; text-align: left; }
 .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--teks-muted); }
 .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; }
 .form-group textarea { resize: vertical; height: 60px; }
 .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
 .btn-cancel { width: 100%; background: #e2e8f0; color: var(--teks); border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 8px; cursor: pointer; }
 #locBtn { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; }
+#pickMapBtn { background: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; }
+#qrcode { display: flex; justify-content: center; margin: 20px 0; padding: 10px; background: white; border-radius: 12px; }
+
+/* STYLE INPUT PENDUDUK */
+.penduduk-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.penduduk-row label { flex: 1; font-size: 12px; font-weight: bold; }
+.penduduk-row input { flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; text-align: right; }
 </style>
 </head>
 <body>
@@ -93,23 +137,42 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
       <button class="filter-btn" data-filter="Rendah">Rendah</button>
     </div>
 
-    <div class="list-title" style="background:#e0f2fe; color:#0369a1;">📊 Analisis Sampah vs Penduduk</div>
-    <div id="analysis-panel" style="padding: 12px; font-size: 12px; background: white; border-bottom: 1px solid #e2e8f0;"></div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔍 Cari nama lokasi / wilayah...">
+      <select id="sortSelect">
+        <option value="default">Urutkan: Terbaru</option>
+        <option value="nama_asc">Nama (A-Z)</option>
+        <option value="nama_desc">Nama (Z-A)</option>
+        <option value="kritis_tinggi">Kekritisan (Tinggi ke Rendah)</option>
+      </select>
+    </div>
+
+    <button id="btnHeatmap" onclick="toggleHeatmap()">🔥 Tampilkan Peta Panas (Heatmap)</button>
+
+    <button id="qrBtnSidebar" onclick="bukaQR()">📱 Bagikan Aplikasi (QR Code)</button>
+    <button id="adminBtnSidebar" onclick="bukaLoginAdmin()">🔐 Login Admin</button>
+    <button id="adminPendudukBtn" onclick="bukaKelolaPenduduk()">⚙️ Kelola Data Penduduk</button>
 
     <div class="list-title">Daftar Lokasi</div>
     <div class="list" id="list"></div>
+
+    <div class="list-title" style="background:#e0f2fe; color:#0369a1; border-top: 2px solid #e2e8f0;">📊 Analisis Sampah vs Penduduk</div>
+    <!-- PERBAIKAN: Analisis mengambil porsi 1/3 ruang, min-height 150px -->
+    <div id="analysis-panel" style="flex: 1; padding: 12px; font-size: 12px; background: white; overflow-y: auto; min-height: 150px;"></div>
   </aside>
 
   <button id="menuBtn">☰</button>
   <div id="map"></div>
   
-  <!-- TOMBOL LAPOR & MODAL FORM -->
   <button id="laporBtn">+ Lapor Sampah</button>
   
-  <div id="modalLapor">
-    <div class="modal-content">
-      <h2>📝 Form Laporan Warga</h2>
+  <!-- MODAL LAPORAN -->
+  <div id="modalLapor" class="modal-overlay">
+    <div class="modal-content" style="text-align: left;">
+      <h2 style="text-align: center;" id="judulForm">📝 Form Laporan Warga</h2>
       <form id="formLaporan">
+        <input type="hidden" id="editId" value="">
+        
         <div class="form-group">
           <label>Nama Lokasi / TPS</label>
           <input type="text" id="inNama" required placeholder="Contoh: TPS Pasar Sentral">
@@ -121,6 +184,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
             <input type="number" step="any" id="inLng" required placeholder="Longitude" style="flex:1;">
           </div>
           <button type="button" id="locBtn" onclick="ambilLokasiGPS()">📍 Ambil Lokasi GPS Saya</button>
+          <button type="button" id="pickMapBtn" onclick="mulaiPilihPeta()">🗺️ Pilih Titik di Peta (Lebih Akurat)</button>
         </div>
         <div class="form-group">
           <label>Kabupaten / Kota</label>
@@ -146,13 +210,63 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
             <option value="Rendah">Rendah (Hijau)</option>
           </select>
         </div>
+        <div class="form-group" id="divStatus" style="display:none;">
+          <label>Status Penanganan (Khusus Admin)</label>
+          <select id="inStatus">
+            <option value="Belum Ditangani">Belum Ditangani</option>
+            <option value="Sudah Ditangani">Sudah Ditangani</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Foto Kondisi Sampah <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
+          <input type="file" id="inFoto" accept="image/*" style="padding: 8px; background: #f8fafc;">
+          <small id="infoFotoLama" style="display:none; color:#64748b; font-size:11px;">Biarkan kosong jika tidak ingin mengganti foto lama.</small>
+        </div>
         <div class="form-group">
           <label>Catatan Tambahan</label>
           <textarea id="inCatatan" placeholder="Contoh: Sudah 3 hari belum diangkut"></textarea>
         </div>
-        <button type="submit" class="btn-submit">Kirim Laporan</button>
+        <div class="form-group" style="background:#fef2f2; padding:10px; border-radius:8px; border:1px solid #fecaca;" id="divAntiBot">
+          <label style="color:#b91c1c;">Verifikasi Anti-Bot: Berapa 3 + 4?</label>
+          <input type="number" id="inVerifikasi" placeholder="Ketik jawabannya di sini">
+        </div>
+        <button type="submit" class="btn-submit" id="btnKirimLaporan">Kirim Laporan</button>
         <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN ADMIN -->
+  <div id="modalLogin" class="modal-overlay">
+    <div class="modal-content">
+      <h2>🔐 Login Admin</h2>
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 15px;">Masukkan password untuk mengedit/menghapus data.</p>
+      <div class="form-group">
+        <input type="password" id="inPasswordAdmin" placeholder="Masukkan Password" style="text-align:center;">
+      </div>
+      <button type="button" class="btn-submit" onclick="prosesLogin()">Masuk</button>
+      <button type="button" class="btn-cancel" onclick="tutupLoginAdmin()">Batal</button>
+    </div>
+  </div>
+
+  <!-- MODAL KELOLA PENDUDUK (KHUSUS ADMIN) -->
+  <div id="modalPenduduk" class="modal-overlay">
+    <div class="modal-content" style="text-align: left;">
+      <h2 style="text-align: center;">⚙️ Kelola Data Penduduk</h2>
+      <p style="font-size: 11px; color: #64748b; margin-bottom: 15px; text-align: center;">Ubah angka penduduk (jiwa). Data analisis akan ter-update otomatis.</p>
+      <div id="formPendudukContainer">
+        <!-- Form akan di-generate oleh JavaScript -->
+      </div>
+      <button type="button" class="btn-cancel" onclick="tutupKelolaPenduduk()" style="margin-top: 15px;">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL QR CODE -->
+  <div id="modalQR" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Scan untuk Buka Peta</h2>
+      <div id="qrcode"></div>
+      <button type="button" class="btn-cancel" onclick="tutupQR()">Tutup</button>
     </div>
   </div>
 
@@ -160,114 +274,199 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-/* ========================================================
-   ⚙️ KONFIGURASI SUPABASE
-   ======================================================== */
-const SUPABASE_URL = 'https://jhetrpqhcytlyqyvfvla.supabase.co/rest/v1/'; 
+const SUPABASE_URL = 'https://jhetrpqhcytlyqyvfvla.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_IuPMT8dpVh7NtXkGTwPHLA_cUbkUuB1';
-
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ========================================================
-   DATA CADANGAN
-   ======================================================== */
-let dataTitik = [
-  { id: 1, nama: "TPS Pasar Sentral", lat: 0.5431, lng: 123.0612, jenis: "Plastik", kritis: "Tinggi", alamat: "-", wilayah: "Kota Gorontalo", catatan: "Menumpuk 3 hari" },
-  { id: 2, nama: "TPS Pasar Limboto", lat: 0.6250, lng: 122.9800, jenis: "Kertas", kritis: "Sedang", alamat: "-", wilayah: "Kab. Gorontalo", catatan: "Perlu armada tambahan" }
-];
+let dataTitik = [];
+let dataPenduduk = {}; 
+let petaMarkers = []; 
+let isAdmin = false; 
+let tempMarker = null;
+let heatLayer = null;
+let isHeatmapMode = false;
 
-const dataPenduduk = {
-  "Kota Gorontalo": 207808, "Kab. Gorontalo": 409509, "Bone Bolango": 170649,
-  "Pohuwato": 153770, "Boalemo": 153274, "Gorontalo Utara": 132784
-};
+let currentFilter = 'all';
+let currentSearch = '';
+let currentSort = 'default';
 
-/* ========================================================
-   LOGIKA PETA
-   ======================================================== */
 const map = L.map('map', { zoomControl: false }).setView([0.543, 123.056], 13);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
 
 const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
-let markers = [];
 
 function buatMarker(titik) {
-  const warnaClass = titik.kritis.toLowerCase();
+  const warnaClass = (titik.is_approved === false) ? 'pending' : titik.kritis.toLowerCase();
+  
   const icon = L.divIcon({
     className: 'custom-div-icon',
-    html: `<div class="marker-pin ${warnaClass}"></div>`,
-    iconSize: [30, 42], iconAnchor: [15, 37], popupAnchor: [0, -35]
+    html: `<div class="marker-pulse ${warnaClass}"></div>`,
+    iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10]
   });
 
+  const fotoUrl = titik.foto ? titik.foto : 'https://via.placeholder.com/400x200?text=Foto+Belum+Ada';
+  const statusClass = titik.status === 'Sudah Ditangani' ? 'status-selesai' : 'status-belum';
+  
+  let pendingHTML = '';
+  if (titik.is_approved === false) {
+    pendingHTML = `<div class="popup-row"><span>Status Data</span><span class="badge-status status-pending">Menunggu Persetujuan</span></div>`;
+  }
+
   const popupHTML = `
+    <img class="popup-img" src="${fotoUrl}" onerror="this.src='https://via.placeholder.com/400x200?text=Foto+Error'">
     <div class="popup-body">
       <div class="popup-title">${titik.nama}</div>
+      ${pendingHTML}
       <div class="popup-row"><span>Jenis</span><b>${titik.jenis}</b></div>
-      <div class="popup-row"><span>Kekritisan</span><span class="badge ${warnaClass}">${titik.kritis}</span></div>
+      <div class="popup-row"><span>Kekritisan</span><span class="badge ${warnaClass === 'pending' ? 'sedang' : warnaClass}">${titik.kritis}</span></div>
+      <div class="popup-row"><span>Status Penanganan</span><span class="badge-status ${statusClass}">${titik.status || 'Belum Ditangani'}</span></div>
       <div class="popup-row"><span>Wilayah</span><b>${titik.wilayah}</b></div>
       <div style="margin-top:8px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:11px;color:#64748b;font-style:italic">${titik.catatan || ''}</div>
     </div>`;
 
-  return L.marker([titik.lat, titik.lng], { icon }).bindPopup(popupHTML, { maxWidth: 260 });
+  return L.marker([parseFloat(titik.lat), parseFloat(titik.lng)], { icon }).bindPopup(popupHTML, { maxWidth: 260 });
+}
+
+function keLokasiMenu(index) {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('menuBtn').textContent = '☰';
+  const marker = petaMarkers[index];
+  if (!marker) return;
+  
+  const lat = marker.getLatLng().lat;
+  const lng = marker.getLatLng().lng;
+  
+  setTimeout(() => {
+    map.invalidateSize(); 
+    map.flyTo([lat, lng], 16, { duration: 1.5 }); 
+    setTimeout(() => { marker.openPopup(); }, 1600);
+  }, 350);
+}
+
+function toggleHeatmap() {
+  isHeatmapMode = !isHeatmapMode;
+  const btn = document.getElementById('btnHeatmap');
+  
+  if (isHeatmapMode) {
+    btn.style.background = '#ef4444';
+    btn.innerHTML = '📍 Tampilkan Titik Biasa';
+  } else {
+    btn.style.background = '#f97316';
+    btn.innerHTML = '🔥 Tampilkan Peta Panas (Heatmap)';
+  }
+  renderSemua(currentFilter);
 }
 
 function renderSemua(filter = 'all') {
+  currentFilter = filter;
   cluster.clearLayers();
-  markers = [];
-  const dataFilter = filter === 'all' ? dataTitik : dataTitik.filter(t => t.kritis === filter);
-
-  dataFilter.forEach(titik => {
-    const m = buatMarker(titik);
-    m.titikData = titik;
-    cluster.addLayer(m);
-    markers.push(m);
-  });
-
-  map.addLayer(cluster);
-  updateStats();
-  renderList(dataFilter);
-}
-
-function updateStats() {
-  document.getElementById('statTinggi').textContent = dataTitik.filter(t => t.kritis === 'Tinggi').length;
-  document.getElementById('statSedang').textContent = dataTitik.filter(t => t.kritis === 'Sedang').length;
-  document.getElementById('statRendah').textContent = dataTitik.filter(t => t.kritis === 'Rendah').length;
-}
-
-function renderList(data) {
+  petaMarkers = []; 
   const list = document.getElementById('list');
   list.innerHTML = '';
-  if (data.length === 0) { list.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">Belum ada data laporan</p>'; return; }
   
-  data.forEach(titik => {
+  let dataFilter = filter === 'all' ? dataTitik : dataTitik.filter(t => t.kritis === filter);
+  
+  if (currentSearch) {
+    dataFilter = dataFilter.filter(t => 
+      t.nama.toLowerCase().includes(currentSearch) || 
+      t.wilayah.toLowerCase().includes(currentSearch)
+    );
+  }
+
+  if (currentSort === 'nama_asc') {
+    dataFilter.sort((a, b) => a.nama.localeCompare(b.nama));
+  } else if (currentSort === 'nama_desc') {
+    dataFilter.sort((a, b) => b.nama.localeCompare(a.nama));
+  } else if (currentSort === 'kritis_tinggi') {
+    const levels = { 'Tinggi': 3, 'Sedang': 2, 'Rendah': 1 };
+    dataFilter.sort((a, b) => levels[b.kritis] - levels[a.kritis]);
+  }
+
+  if (dataFilter.length === 0) { 
+    list.innerHTML = '<p style="padding:20px;text-align:center;color:#94a3b8;font-size:13px">Data tidak ditemukan.</p>'; 
+  }
+
+  if (isHeatmapMode) {
+    map.removeLayer(cluster);
+    if (heatLayer) map.removeLayer(heatLayer);
+    const heatData = dataFilter.map(t => {
+      let intensity = t.kritis === 'Tinggi' ? 1 : (t.kritis === 'Sedang' ? 0.6 : 0.3);
+      return [parseFloat(t.lat), parseFloat(t.lng), intensity];
+    });
+    heatLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 17 }).addTo(map);
+  } else {
+    if (heatLayer) map.removeLayer(heatLayer);
+    dataFilter.forEach((titik, index) => {
+      const marker = buatMarker(titik);
+      cluster.addLayer(marker);
+      petaMarkers.push(marker); 
+    });
+    map.addLayer(cluster);
+  }
+
+  dataFilter.forEach((titik, index) => {
     const div = document.createElement('div');
     div.className = 'item';
+    
+    let adminHTML = '';
+    if (isAdmin) {
+      let tombolAcc = '';
+      if (titik.is_approved === false) {
+        tombolAcc = `<button class="btn-admin-acc" onclick="setujuiData('${titik.id}')">✅ Setujui</button>`;
+      } else {
+        if (titik.status !== 'Sudah Ditangani') {
+          tombolAcc = `<button class="btn-admin-selesai" onclick="tandaiSelesai('${titik.id}')">✅ Selesai</button>`;
+        }
+      }
+      adminHTML = `
+        <div class="admin-actions">
+          ${tombolAcc}
+          <button class="btn-admin-edit" onclick="bukaEdit('${titik.id}')">✏️ Edit</button>
+          <button class="btn-admin-hapus" onclick="hapusData('${titik.id}')">🗑️ Hapus</button>
+        </div>
+      `;
+    }
+    
+    const statusClass = titik.status === 'Sudah Ditangani' ? 'status-selesai' : 'status-belum';
+    const pendingHTML = (titik.is_approved === false) ? `<span class="badge-status status-pending">Pending</span>` : '';
+
     div.innerHTML = `
       <div class="item-title">${titik.nama}</div>
       <div class="item-meta">
-        <span>${titik.jenis}</span>
+        ${pendingHTML}
         <span class="badge ${titik.kritis.toLowerCase()}">${titik.kritis}</span>
-      </div>`;
-    div.onclick = () => {
-      const marker = markers.find(x => x.titikData.id === titik.id || x.titikData.nama === titik.nama);
-      if (marker) {
-        cluster.zoomToShowLayer(marker, () => marker.openPopup());
-        map.flyTo([titik.lat, titik.lng], 17, { duration: 0.8 });
-      }
-      document.getElementById('sidebar').classList.remove('open');
-    };
+        <span class="badge-status ${statusClass}">${titik.status || 'Belum Ditangani'}</span>
+      </div>
+      <button class="btn-lihat" onclick="keLokasiMenu(${index})">🗺️ Lihat Lokasi di Peta</button>
+      ${adminHTML}
+    `;
     list.appendChild(div);
   });
+
+  updateStats();
+}
+
+function updateStats() {
+  const approvedData = dataTitik.filter(t => t.is_approved !== false);
+  document.getElementById('statTinggi').textContent = approvedData.filter(t => t.kritis === 'Tinggi').length;
+  document.getElementById('statSedang').textContent = approvedData.filter(t => t.kritis === 'Sedang').length;
+  document.getElementById('statRendah').textContent = approvedData.filter(t => t.kritis === 'Rendah').length;
 }
 
 function renderAnalisis() {
   const panel = document.getElementById('analysis-panel');
   panel.innerHTML = '';
   let skorSampah = {};
-  dataTitik.forEach(t => {
+  
+  const approvedData = dataTitik.filter(t => t.is_approved !== false);
+  
+  approvedData.forEach(t => {
     let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1);
     skorSampah[t.wilayah] = (skorSampah[t.wilayah] || 0) + nilai;
   });
@@ -275,7 +474,7 @@ function renderAnalisis() {
   for (let wilayah in skorSampah) {
     let penduduk = dataPenduduk[wilayah] || 0;
     let skor = skorSampah[wilayah];
-    let rasio = (skor / (penduduk / 100000)).toFixed(2);
+    let rasio = penduduk > 0 ? (skor / (penduduk / 100000)).toFixed(2) : "0.00";
     let warna = rasio > 1.5 ? '#ef4444' : (rasio > 0.5 ? '#f59e0b' : '#10b981');
     let status = rasio > 1.5 ? 'Waspada' : (rasio > 0.5 ? 'Pantau' : 'Aman');
 
@@ -290,6 +489,16 @@ function renderAnalisis() {
       </div>`;
   }
 }
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  currentSearch = e.target.value.toLowerCase();
+  renderSemua(currentFilter);
+});
+
+document.getElementById('sortSelect').addEventListener('change', (e) => {
+  currentSort = e.target.value;
+  renderSemua(currentFilter);
+});
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.onclick = () => {
@@ -306,14 +515,142 @@ document.getElementById('menuBtn').onclick = () => {
 };
 
 /* ========================================================
-   LOGIKA FORM LAPORAN
+   LOGIKA ADMIN
    ======================================================== */
+function bukaLoginAdmin() { document.getElementById('modalLogin').style.display = 'flex'; }
+function tutupLoginAdmin() { document.getElementById('modalLogin').style.display = 'none'; }
+
+function prosesLogin() {
+  const pass = document.getElementById('inPasswordAdmin').value;
+  if (pass === 'admin123') { 
+    isAdmin = true;
+    alert("✅ Login Admin Berhasil!");
+    tutupLoginAdmin();
+    document.getElementById('adminBtnSidebar').textContent = "🔓 Logout Admin";
+    document.getElementById('adminBtnSidebar').style.background = "#ef4444";
+    document.getElementById('adminBtnSidebar').setAttribute('onclick', 'logoutAdmin()');
+    document.getElementById('adminPendudukBtn').style.display = 'block';
+    ambilData(); 
+  } else {
+    alert("❌ Password salah!");
+  }
+}
+
+function logoutAdmin() {
+  isAdmin = false;
+  alert("Anda telah logout.");
+  document.getElementById('adminBtnSidebar').textContent = "🔐 Login Admin";
+  document.getElementById('adminBtnSidebar').style.background = "#64748b";
+  document.getElementById('adminBtnSidebar').setAttribute('onclick', 'bukaLoginAdmin()');
+  document.getElementById('adminPendudukBtn').style.display = 'none';
+  ambilData(); 
+}
+
+/* ========================================================
+   FITUR KELOLA DATA PENDUDUK (ADMIN)
+   ======================================================== */
+function bukaKelolaPenduduk() {
+  const container = document.getElementById('formPendudukContainer');
+  container.innerHTML = '';
+  for (let wilayah in dataPenduduk) {
+    let row = document.createElement('div');
+    row.className = 'penduduk-row';
+    let safeId = wilayah.replace(/[^a-zA-Z0-9]/g, '_');
+    row.innerHTML = `
+      <label>${wilayah}</label>
+      <input type="number" id="input_${safeId}" value="${dataPenduduk[wilayah]}" onchange="simpanPenduduk('${wilayah}', this.value)">
+    `;
+    container.appendChild(row);
+  }
+  document.getElementById('modalPenduduk').style.display = 'flex';
+}
+
+function tutupKelolaPenduduk() {
+  document.getElementById('modalPenduduk').style.display = 'none';
+}
+
+async function simpanPenduduk(wilayah, nilaiBaru) {
+  const jumlah = parseInt(nilaiBaru);
+  if (isNaN(jumlah) || jumlah < 0) {
+    alert("Masukkan angka yang valid!");
+    return;
+  }
+  try {
+    const { error } = await supabaseClient.from('data_penduduk')
+      .update({ jumlah_penduduk: jumlah })
+      .eq('nama_wilayah', wilayah);
+    if (error) throw error;
+    dataPenduduk[wilayah] = jumlah;
+    renderAnalisis();
+  } catch (err) {
+    alert("Gagal menyimpan data penduduk: " + err.message);
+  }
+}
+
+/* ========================================================
+   LOGIKA LAINNYA (ACC, EDIT, HAPUS, FORM)
+   ======================================================== */
+async function setujuiData(id) {
+  if (!confirm("Setujui laporan ini agar muncul di peta publik?")) return;
+  const { error } = await supabaseClient.from('titik_sampah').update({ is_approved: true }).eq('id', id);
+  if (error) alert("Gagal: " + error.message);
+  else { alert("✅ Laporan disetujui."); ambilData(); }
+}
+
+async function tandaiSelesai(id) {
+  if (!confirm("Tandai titik sampah ini sebagai 'Sudah Ditangani'?")) return;
+  const { error } = await supabaseClient.from('titik_sampah').update({ status: 'Sudah Ditangani' }).eq('id', id);
+  if (error) alert("Gagal: " + error.message);
+  else { alert("✅ Status diubah."); ambilData(); }
+}
+
+function bukaEdit(id) {
+  const data = dataTitik.find(t => t.id == id);
+  if (!data) return;
+
+  document.getElementById('judulForm').textContent = "✏️ Edit Laporan Sampah";
+  document.getElementById('editId').value = data.id;
+  document.getElementById('inNama').value = data.nama;
+  document.getElementById('inLat').value = data.lat;
+  document.getElementById('inLng').value = data.lng;
+  document.getElementById('inWilayah').value = data.wilayah;
+  document.getElementById('inJenis').value = data.jenis;
+  document.getElementById('inKritis').value = data.kritis;
+  document.getElementById('inCatatan').value = data.catatan;
+  document.getElementById('divStatus').style.display = 'block';
+  document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
+  document.getElementById('divAntiBot').style.display = 'none';
+  document.getElementById('inVerifikasi').required = false;
+  document.getElementById('inFoto').required = false;
+  document.getElementById('labelFotoWajib').style.display = 'none';
+  document.getElementById('infoFotoLama').style.display = 'block';
+  document.getElementById('modalLapor').style.display = 'flex';
+}
+
+async function hapusData(id) {
+  if (!confirm("Apakah Anda yakin ingin menghapus data ini?")) return;
+  const { error } = await supabaseClient.from('titik_sampah').delete().eq('id', id);
+  if (error) alert("Gagal: " + error.message);
+  else { alert("✅ Data dihapus."); ambilData(); }
+}
+
 document.getElementById('laporBtn').onclick = () => {
+  document.getElementById('formLaporan').reset();
+  document.getElementById('judulForm').textContent = "📝 Form Laporan Warga";
+  document.getElementById('editId').value = "";
+  document.getElementById('divAntiBot').style.display = 'block';
+  document.getElementById('inVerifikasi').required = true;
+  document.getElementById('inFoto').required = true;
+  document.getElementById('labelFotoWajib').style.display = 'inline';
+  document.getElementById('infoFotoLama').style.display = 'none';
+  document.getElementById('divStatus').style.display = 'none';
+  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
   document.getElementById('modalLapor').style.display = 'flex';
 };
 
 function tutupModal() {
   document.getElementById('modalLapor').style.display = 'none';
+  if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
 }
 
 function ambilLokasiGPS() {
@@ -322,76 +659,140 @@ function ambilLokasiGPS() {
       document.getElementById('inLat').value = position.coords.latitude;
       document.getElementById('inLng').value = position.coords.longitude;
       alert("Lokasi GPS berhasil diambil!");
-    }, (error) => {
-      alert("Gagal mengambil lokasi. Pastikan izin GPS aktif di browser.");
-    });
-  } else {
-    alert("HP Anda tidak mendukung GPS.");
-  }
+    }, (error) => { alert("Gagal mengambil lokasi. Pastikan izin GPS aktif."); });
+  } else { alert("HP Anda tidak mendukung GPS."); }
+}
+
+function mulaiPilihPeta() {
+  document.getElementById('modalLapor').style.display = 'none';
+  alert("Silakan ketuk peta di lokasi sampah untuk mengambil koordinat.");
+  document.getElementById('map').style.cursor = 'crosshair';
+  map.once('click', function(e) {
+    const lat = e.latlng.lat, lng = e.latlng.lng;
+    document.getElementById('inLat').value = lat.toFixed(6);
+    document.getElementById('inLng').value = lng.toFixed(6);
+    if (tempMarker) map.removeLayer(tempMarker);
+    tempMarker = L.marker([lat, lng]).addTo(map).bindPopup("<b>Lokasi Dipilih</b>").openPopup();
+    document.getElementById('map').style.cursor = '';
+    document.getElementById('modalLapor').style.display = 'flex';
+  });
 }
 
 document.getElementById('formLaporan').onsubmit = async (e) => {
   e.preventDefault();
-  const btnSubmit = document.querySelector('.btn-submit');
-  btnSubmit.textContent = 'Mengirim...';
+  const editId = document.getElementById('editId').value;
+  const isEditMode = editId !== "";
+
+  if (!isEditMode) {
+    const verifikasi = parseInt(document.getElementById('inVerifikasi').value);
+    if (verifikasi !== 7) { alert("❌ Jawaban verifikasi anti-bot salah!"); return; }
+  }
+
+  const btnSubmit = document.getElementById('btnKirimLaporan');
+  const fileInput = document.getElementById('inFoto');
+  btnSubmit.textContent = 'Memproses...';
   btnSubmit.disabled = true;
 
-  const dataBaru = {
-    nama: document.getElementById('inNama').value,
-    lat: parseFloat(document.getElementById('inLat').value),
-    lng: parseFloat(document.getElementById('inLng').value),
-    wilayah: document.getElementById('inWilayah').value,
-    jenis: document.getElementById('inJenis').value,
-    kritis: document.getElementById('inKritis').value,
-    catatan: document.getElementById('inCatatan').value,
-    alamat: "-", foto: ""
-  };
-
-  // Kirim ke Supabase
-  const { data, error } = await supabaseClient.from('titik_sampah').insert([dataBaru]);
-
-  btnSubmit.textContent = 'Kirim Laporan';
-  btnSubmit.disabled = false;
-
-  if (error) {
-    alert("Gagal mengirim laporan: " + error.message);
-    console.error(error);
+  let fotoUrl = "", statusValue = "Belum Ditangani", isApprovedValue = false; 
+  
+  if (isEditMode) {
+    const dataLama = dataTitik.find(t => t.id == editId);
+    if (dataLama) { fotoUrl = dataLama.foto; isApprovedValue = dataLama.is_approved; }
+    statusValue = document.getElementById('inStatus').value;
   } else {
-    alert("✅ Laporan berhasil dikirim! Cek peta, titik baru sudah muncul.");
+    if (isAdmin) isApprovedValue = true;
+  }
+
+  try {
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+      const { data: uploadData, error: uploadError } = await supabaseClient.storage.from('foto_sampah').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: publicUrlData } = supabaseClient.storage.from('foto_sampah').getPublicUrl(fileName);
+      fotoUrl = publicUrlData.publicUrl;
+    }
+
+    const dataBaru = {
+      nama: document.getElementById('inNama').value,
+      lat: parseFloat(document.getElementById('inLat').value),
+      lng: parseFloat(document.getElementById('inLng').value),
+      wilayah: document.getElementById('inWilayah').value,
+      jenis: document.getElementById('inJenis').value,
+      kritis: document.getElementById('inKritis').value,
+      status: statusValue,
+      is_approved: isApprovedValue,
+      catatan: document.getElementById('inCatatan').value,
+      alamat: "-", 
+      foto: fotoUrl
+    };
+
+    let error;
+    if (isEditMode) {
+      const result = await supabaseClient.from('titik_sampah').update(dataBaru).eq('id', editId);
+      error = result.error;
+    } else {
+      const result = await supabaseClient.from('titik_sampah').insert([dataBaru]);
+      error = result.error;
+    }
+
+    if (error) throw error;
+    alert(isEditMode ? "✅ Data diperbarui!" : (isAdmin ? "✅ Laporan Admin ditambahkan!" : "✅ Laporan dikirim! Menunggu ACC Admin."));
+    if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
     tutupModal();
-    document.getElementById('formLaporan').reset();
-    
-    // Fallback: Jika peta belum terupdate via real-time, kita paksa tarik data
     ambilData(); 
+  } catch (error) {
+    alert("❌ Gagal: " + error.message);
+  } finally {
+    btnSubmit.textContent = 'Kirim Laporan';
+    btnSubmit.disabled = false;
   }
 };
 
-/* ========================================================
-   KONEKSI SUPABASE (REAL-TIME)
-   ======================================================== */
+let qrGenerated = false;
+function bukaQR() {
+  document.getElementById('modalQR').style.display = 'flex';
+  if (!qrGenerated) {
+    const linkWebsite = "https://samaranakun61-pixel.github.io/peta_sampah/";
+    new QRCode(document.getElementById("qrcode"), {
+      text: linkWebsite, width: 200, height: 200, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+    });
+    qrGenerated = true;
+  }
+}
+function tutupQR() { document.getElementById('modalQR').style.display = 'none'; }
+
 async function ambilData() {
   try {
-    if (SUPABASE_URL === 'ISI_URL_SUPABASE_ANDA') return; 
+    let query = supabaseClient.from('titik_sampah').select('*');
+    if (!isAdmin) query = query.eq('is_approved', true);
+    const { data: dataSampah, error: errSampah } = await query;
+    if (!errSampah) dataTitik = dataSampah || [];
 
-    const { data, error } = await supabaseClient.from('titik_sampah').select('*');
-    if (error) { console.error("Gagal ambil data:", error); return; }
-    
-    if (data && data.length > 0) {
-      dataTitik = data; 
-      renderSemua('all');
-      renderAnalisis();
+    const { data: dataPend, error: errPend } = await supabaseClient.from('data_penduduk').select('*');
+    if (!errPend && dataPend) {
+      dataPenduduk = {};
+      dataPend.forEach(item => {
+        dataPenduduk[item.nama_wilayah] = item.jumlah_penduduk;
+      });
     }
+
+    renderSemua(currentFilter);
+    renderAnalisis();
   } catch (err) { console.log("Error koneksi:", err); }
 }
 
-renderSemua('all');
+renderSemua(currentFilter);
 renderAnalisis();
 ambilData();
 
-supabaseClient.channel('schema-db-changes')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, payload => {
-    ambilData(); 
-  }).subscribe();
+supabaseClient.channel('schema-db-changes-sampah')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'titik_sampah' }, payload => { ambilData(); })
+  .subscribe();
+
+supabaseClient.channel('schema-db-changes-penduduk')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'data_penduduk' }, payload => { ambilData(); })
+  .subscribe();
 </script>
 </body>
 </html>
