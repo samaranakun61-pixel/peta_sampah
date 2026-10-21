@@ -8,7 +8,8 @@
   <!-- KODE PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#059669">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
+  <!-- Menggunakan ikon recycle hijau -->
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2891/2891491.png">
 
   <!-- Pustaka Leaflet & CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -137,7 +138,7 @@
 <div id="app">
   <aside id="sidebar">
     <div class="brand">
-      <h1>♻️ SIGAP Sampah</h1>
+      <h1>♻️ SIGAP Sampah Gorontalo</h1>
       <p>Sistem Informasi Geografis Pengelolaan Sampah</p>
     </div>
 
@@ -996,7 +997,7 @@ supabaseClient.channel('schema-db-changes-penduduk')
   .subscribe();
 </script>
 
-<!-- MENGAKTIFKAN SERVICE WORKER PWA (CUKUP SATU SAJA) -->
+<!-- MENGAKTIFKAN SERVICE WORKER PWA -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
