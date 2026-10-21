@@ -1036,7 +1036,7 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
 };
 
 let qrGenerated = false;
-function bukaQR() { document.getElementById('modalQR').style.display = 'flex'; if (!qrGenerated) { const linkWebsite = "https://samaranakun61-pixel.github.io/peta_sampah/"; new QRCode(document.getElementById("qrcode"), { text: linkWebsite, width: 200, height: 200, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); qrGenerated = true; } }
+function bukaQR() { document.getElementById('modalQR').style.display = 'flex'; if (!qrGenerated) { const linkWebsite = "https://tuwoto-app.github.io/"; new QRCode(document.getElementById("qrcode"), { text: linkWebsite, width: 200, height: 200, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); qrGenerated = true; } }
 function tutupQR() { document.getElementById('modalQR').style.display = 'none'; }
 
 async function ambilData() {
