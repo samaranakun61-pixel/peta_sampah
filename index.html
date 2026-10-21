@@ -1,136 +1,138 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>SIGAP Sampah Gorontalo</title>
+
   <!-- KODE PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#059669">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-<title>SIGAP Sampah Gorontalo</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#059669">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <!-- Pustaka Leaflet & CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
-<style>
-:root { --hijau: #10b981; --kuning: #f59e0b; --merah: #ef4444; --bg: #f1f5f9; --card: #ffffff; --teks: #0f172a; --teks-muted: #64748b; --primary: #059669; --biru: #3b82f6; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--teks); }
-#app { display: flex; height: 100vh; height: 100dvh; width: 100vw; position: relative; overflow: hidden; }
+  <style>
+    :root { --hijau: #10b981; --kuning: #f59e0b; --merah: #ef4444; --bg: #f1f5f9; --card: #ffffff; --teks: #0f172a; --teks-muted: #64748b; --primary: #059669; --biru: #3b82f6; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--teks); }
+    #app { display: flex; height: 100vh; height: 100dvh; width: 100vw; position: relative; overflow: hidden; }
 
-#sidebar { width: 340px; background: var(--card); box-shadow: 4px 0 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; z-index: 9999 !important; transition: transform 0.3s; height: 100%; }
-.brand { padding: 20px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; }
-.brand h1 { font-size: 18px; font-weight: 700; }
-.brand p { font-size: 12px; opacity: 0.9; margin-top: 4px; }
-.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-.stat { background: white; padding: 10px 6px; border-radius: 10px; text-align: center; border-top: 3px solid var(--merah); }
-.stat:nth-child(2) { border-top-color: var(--kuning); }
-.stat:nth-child(3) { border-top-color: var(--hijau); }
-.stat-num { font-size: 20px; font-weight: 700; }
-.stat-label { font-size: 10px; color: var(--teks-muted); text-transform: uppercase; margin-top: 2px; }
-.filters { padding: 12px 16px 8px 16px; display: flex; gap: 8px; flex-wrap: wrap; }
-.filter-btn { padding: 6px 12px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: white; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--teks-muted); }
-.filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    #sidebar { width: 340px; background: var(--card); box-shadow: 4px 0 20px rgba(0,0,0,0.06); display: flex; flex-direction: column; z-index: 9999 !important; transition: transform 0.3s; height: 100%; }
+    .brand { padding: 20px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; }
+    .brand h1 { font-size: 18px; font-weight: 700; }
+    .brand p { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+    .stat { background: white; padding: 10px 6px; border-radius: 10px; text-align: center; border-top: 3px solid var(--merah); }
+    .stat:nth-child(2) { border-top-color: var(--kuning); }
+    .stat:nth-child(3) { border-top-color: var(--hijau); }
+    .stat-num { font-size: 20px; font-weight: 700; }
+    .stat-label { font-size: 10px; color: var(--teks-muted); text-transform: uppercase; margin-top: 2px; }
+    .filters { padding: 12px 16px 8px 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-btn { padding: 6px 12px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: white; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--teks-muted); }
+    .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-.search-box { padding: 0 16px 12px 16px; border-bottom: 1px solid #e2e8f0; }
-.search-box input { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; margin-bottom: 8px; }
-.search-box select { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; background: white; }
+    .search-box { padding: 0 16px 12px 16px; border-bottom: 1px solid #e2e8f0; }
+    .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; margin-bottom: 8px; }
+    .search-box select { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; background: white; }
 
-/* TOGGLE LAYER TAMPILAN */
-.layer-toggle { padding: 0 16px 12px 16px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--teks); }
-.layer-toggle input { width: 18px; height: 18px; cursor: pointer; }
+    /* TOGGLE LAYER TAMPILAN */
+    .layer-toggle { padding: 0 16px 12px 16px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--teks); }
+    .layer-toggle input { width: 18px; height: 18px; cursor: pointer; }
 
-#btnChoropleth { background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 0 16px 10px 16px; text-align: center; transition: all 0.3s; }
-#btnHeatmap { background: #f97316; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 0 16px 10px 16px; text-align: center; transition: all 0.3s; }
+    #btnChoropleth { background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 0 16px 10px 16px; text-align: center; transition: all 0.3s; }
+    #btnHeatmap { background: #f97316; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 0 16px 10px 16px; text-align: center; transition: all 0.3s; }
 
-.list-title { padding: 10px 16px; font-size: 11px; font-weight: 700; color: var(--teks-muted); text-transform: uppercase; background: #f8fafc; }
-.list { flex: 2; overflow-y: auto; padding: 8px; min-height: 150px; }
-.item { padding: 12px; border-radius: 10px; background: white; margin-bottom: 8px; border: 1px solid #e2e8f0; }
-.item-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-.item-meta { font-size: 11px; color: var(--teks-muted); display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-.badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; color: white; }
-.badge.tinggi { background: var(--merah); }
-.badge.sedang { background: var(--kuning); }
-.badge.rendah { background: var(--hijau); }
-.badge.besar { background: var(--merah); }
-.badge.kecil { background: var(--hijau); }
-.badge.fasilitas { background: var(--biru); }
-.badge-status { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
-.status-belum { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-.status-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-.status-pending { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+    .list-title { padding: 10px 16px; font-size: 11px; font-weight: 700; color: var(--teks-muted); text-transform: uppercase; background: #f8fafc; }
+    .list { flex: 2; overflow-y: auto; padding: 8px; min-height: 150px; }
+    .item { padding: 12px; border-radius: 10px; background: white; margin-bottom: 8px; border: 1px solid #e2e8f0; }
+    .item-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .item-meta { font-size: 11px; color: var(--teks-muted); display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; color: white; }
+    .badge.tinggi { background: var(--merah); }
+    .badge.sedang { background: var(--kuning); }
+    .badge.rendah { background: var(--hijau); }
+    .badge.besar { background: var(--merah); }
+    .badge.kecil { background: var(--hijau); }
+    .badge.fasilitas { background: var(--biru); }
+    .badge-status { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+    .status-belum { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .status-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .status-pending { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
 
-#map { flex: 1; height: 100%; width: 100%; z-index: 1 !important; }
+    #map { flex: 1; height: 100%; width: 100%; z-index: 1 !important; }
 
-.btn-lihat { width: 100%; padding: 8px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; margin-bottom: 4px; }
-.btn-admin-edit { background: #fef08a; color: #854d0e; border: 1px solid #fde047; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
-.btn-admin-hapus { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
-.btn-admin-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
-.btn-admin-acc { background: #3b82f6; color: white; border: 1px solid #2563eb; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
-.admin-actions { display: flex; gap: 6px; margin-top: 4px; }
+    .btn-lihat { width: 100%; padding: 8px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; margin-bottom: 4px; }
+    .btn-admin-edit { background: #fef08a; color: #854d0e; border: 1px solid #fde047; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .btn-admin-hapus { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .btn-admin-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .btn-admin-acc { background: #3b82f6; color: white; border: 1px solid #2563eb; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
+    .admin-actions { display: flex; gap: 6px; margin-top: 4px; }
 
-/* STYLE TITIK BULAT BERKEDIP (KRISIS) */
-.custom-div-icon { background: none !important; border: none !important; }
-.marker-pulse { width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; }
-.marker-pulse.tinggi { background: var(--merah); animation: pulse-merah 1.5s infinite; }
-.marker-pulse.sedang { background: var(--kuning); animation: pulse-kuning 1.5s infinite; }
-.marker-pulse.rendah { background: var(--hijau); animation: pulse-hijau 1.5s infinite; }
-.marker-pulse.pending { background: #94a3b8; animation: none; }
+    /* STYLE TITIK BULAT BERKEDIP (KRISIS) */
+    .custom-div-icon { background: none !important; border: none !important; }
+    .marker-pulse { width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; }
+    .marker-pulse.tinggi { background: var(--merah); animation: pulse-merah 1.5s infinite; }
+    .marker-pulse.sedang { background: var(--kuning); animation: pulse-kuning 1.5s infinite; }
+    .marker-pulse.rendah { background: var(--hijau); animation: pulse-hijau 1.5s infinite; }
+    .marker-pulse.pending { background: #94a3b8; animation: none; }
 
-@keyframes pulse-merah { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-@keyframes pulse-kuning { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
-@keyframes pulse-hijau { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+    @keyframes pulse-merah { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    @keyframes pulse-kuning { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
+    @keyframes pulse-hijau { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 
-/* STYLE IKON TEMPAT SAMPAH (FASILITAS) */
-.marker-fasilitas {
-  background: var(--biru); color: white; border-radius: 50%; width: 30px; height: 30px;
-  display: flex; align-items: center; justify-content: center; font-size: 16px;
-  border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
+    /* STYLE IKON TEMPAT SAMPAH (FASILITAS) */
+    .marker-fasilitas {
+      background: var(--biru); color: white; border-radius: 50%; width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+      border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
 
-.leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; overflow: hidden; }
-.leaflet-popup-content { margin: 0; }
-.popup-img { width: 100%; height: 140px; object-fit: cover; background: #e2e8f0; display: block; }
-.popup-body { padding: 12px; }
-.popup-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-.popup-row { font-size: 12px; color: var(--teks-muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; overflow: hidden; }
+    .leaflet-popup-content { margin: 0; }
+    .popup-img { width: 100%; height: 140px; object-fit: cover; background: #e2e8f0; display: block; }
+    .popup-body { padding: 12px; }
+    .popup-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .popup-row { font-size: 12px; color: var(--teks-muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
 
-#menuBtn { display: none; position: absolute; top: 16px; left: 16px; z-index: 10000 !important; background: white; border: none; width: 44px; height: 44px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; font-size: 20px; }
+    #menuBtn { display: none; position: absolute; top: 16px; left: 16px; z-index: 10000 !important; background: white; border: none; width: 44px; height: 44px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; font-size: 20px; }
 
-@media (max-width: 768px) {
-  #sidebar { position: absolute; top: 0; left: 0; height: 100%; transform: translateX(-100%); }
-  #sidebar.open { transform: translateX(0); }
-  #menuBtn { display: flex; align-items: center; justify-content: center; }
-  .brand { padding-left: 70px; }
-  #sidebar.open ~ #laporBtn { display: none; } 
-}
+    @media (max-width: 768px) {
+      #sidebar { position: absolute; top: 0; left: 0; height: 100%; transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      #menuBtn { display: flex; align-items: center; justify-content: center; }
+      .brand { padding-left: 70px; }
+      #sidebar.open ~ #laporBtn { display: none; } 
+    }
 
-#laporBtn { position: absolute; bottom: 30px; right: 30px; z-index: 9999 !important; background: var(--merah); color: white; border: none; padding: 15px 25px; border-radius: 30px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 8px; }
-#qrBtnSidebar { background: #0ea5e9; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin: 5px 16px; text-align: center; }
-#adminBtnSidebar { background: #64748b; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin: 5px 16px; text-align: center; }
-#adminPendudukBtn { display: none; background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin: 5px 16px; text-align: center; }
+    #laporBtn { position: absolute; bottom: 30px; right: 30px; z-index: 9999 !important; background: var(--merah); color: white; border: none; padding: 15px 25px; border-radius: 30px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    #qrBtnSidebar { background: #0ea5e9; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin: 5px 16px; text-align: center; }
+    #adminBtnSidebar { background: #64748b; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin: 5px 16px; text-align: center; }
+    #adminPendudukBtn { display: none; background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin: 5px 16px; text-align: center; }
 
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001 !important; align-items: center; justify-content: center; padding: 20px; }
-.modal-content { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; }
-.modal-content h2 { font-size: 18px; margin-bottom: 15px; color: var(--teks); }
-.form-group { margin-bottom: 12px; text-align: left; }
-.form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--teks-muted); }
-.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; }
-.form-group textarea { resize: vertical; height: 60px; }
-.btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
-.btn-cancel { width: 100%; background: #e2e8f0; color: var(--teks); border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 8px; cursor: pointer; }
-#locBtn { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; }
-#pickMapBtn { background: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; }
-#qrcode { display: flex; justify-content: center; margin: 20px 0; padding: 10px; background: white; border-radius: 12px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001 !important; align-items: center; justify-content: center; padding: 20px; }
+    .modal-content { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; }
+    .modal-content h2 { font-size: 18px; margin-bottom: 15px; color: var(--teks); }
+    .form-group { margin-bottom: 12px; text-align: left; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--teks-muted); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; }
+    .form-group textarea { resize: vertical; height: 60px; }
+    .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    .btn-cancel { width: 100%; background: #e2e8f0; color: var(--teks); border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 8px; cursor: pointer; }
+    #locBtn { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; }
+    #pickMapBtn { background: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; }
+    #qrcode { display: flex; justify-content: center; margin: 20px 0; padding: 10px; background: white; border-radius: 12px; }
 
-.penduduk-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-.penduduk-row label { flex: 1; font-size: 12px; font-weight: bold; }
-.penduduk-row input { flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; text-align: right; }
-</style>
+    .penduduk-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .penduduk-row label { flex: 1; font-size: 12px; font-weight: bold; }
+    .penduduk-row input { flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; text-align: right; }
+  </style>
 </head>
-<>
+<body>
 
 <div id="app">
   <aside id="sidebar">
@@ -304,6 +306,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
 </div>
 
+<!-- Pustaka JavaScript -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
@@ -336,7 +339,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:
 const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
 
 // ==========================================
-// FITUR BARU: CHOROPLETH (BATAS WILAYAH)
+// FITUR CHOROPLETH (BATAS WILAYAH)
 // ==========================================
 async function toggleChoropleth() {
   isChoroplethMode = !isChoroplethMode;
@@ -362,7 +365,6 @@ async function muatChoropleth() {
   }
 
   try {
-    // MENGGUNAKAN CDN JSDELIVR (Jauh lebih stabil dari raw GitHub)
     const urlGeoJSON = 'https://cdn.jsdelivr.net/gh/yusufsyaifudin/wilayah-indonesia@master/data/geoJSON/kabupaten/75.json';
     
     const response = await fetch(urlGeoJSON);
@@ -641,7 +643,7 @@ function renderSemua(filter = 'all') {
   });
 
   updateStats();
-  if (isChoroplethMode) muatChoropleth(); // Update warna choropleth jika data berubah
+  if (isChoroplethMode) muatChoropleth(); 
 }
 
 function updateStats() {
@@ -769,7 +771,7 @@ async function simpanPenduduk(wilayah, nilaiBaru) {
     if (error) throw error;
     dataPenduduk[wilayah] = jumlah;
     renderAnalisis();
-    if (isChoroplethMode) muatChoropleth(); // Update warna choropleth jika penduduk berubah
+    if (isChoroplethMode) muatChoropleth(); 
   } catch (err) { alert("Gagal menyimpan data penduduk: " + err.message); }
 }
 
@@ -798,7 +800,7 @@ function bukaEdit(id) {
   document.getElementById('editId').value = data.id;
   
   document.getElementById('inKategori').value = data.kategori || 'krisis';
-  ubahFormKategori(); // Sesuaikan label form dan opsi dropdown
+  ubahFormKategori();
   
   document.getElementById('inNama').value = data.nama;
   document.getElementById('inLat').value = data.lat;
@@ -993,21 +995,8 @@ supabaseClient.channel('schema-db-changes-penduduk')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'data_penduduk' }, payload => { ambilData(); })
   .subscribe();
 </script>
-  <!-- MENGAKTIFKAN SERVICE WORKER PWA -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(registration => {
-          console.log('Service Worker aktif:', registration.scope);
-        })
-        .catch(error => {
-          console.log('Service Worker gagal:', error);
-        });
-    });
-  }
-</script>
-  <!-- MENGAKTIFKAN SERVICE WORKER PWA -->
+
+<!-- MENGAKTIFKAN SERVICE WORKER PWA (CUKUP SATU SAJA) -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
