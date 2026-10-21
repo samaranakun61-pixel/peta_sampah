@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <!-- KODE PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#059669">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-<title>Peta Krisis Sampah Gorontalo</title>
+<title>SIGAP Sampah Gorontalo</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
 <style>
-:root { --hijau: #10b981; --kuning: #f59e0b; --merah: #ef4444; --bg: #f1f5f9; --card: #ffffff; --teks: #0f172a; --teks-muted: #64748b; --primary: #059669; }
+:root { --hijau: #10b981; --kuning: #f59e0b; --merah: #ef4444; --bg: #f1f5f9; --card: #ffffff; --teks: #0f172a; --teks-muted: #64748b; --primary: #059669; --biru: #3b82f6; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--teks); }
@@ -34,13 +38,15 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; margin-bottom: 8px; }
 .search-box select { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; background: white; }
 
+/* TOGGLE LAYER TAMPILAN */
+.layer-toggle { padding: 0 16px 12px 16px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--teks); }
+.layer-toggle input { width: 18px; height: 18px; cursor: pointer; }
+
+#btnChoropleth { background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 0 16px 10px 16px; text-align: center; transition: all 0.3s; }
 #btnHeatmap { background: #f97316; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 0 16px 10px 16px; text-align: center; transition: all 0.3s; }
 
 .list-title { padding: 10px 16px; font-size: 11px; font-weight: 700; color: var(--teks-muted); text-transform: uppercase; background: #f8fafc; }
-
-/* PERBAIKAN: Daftar Lokasi mengambil porsi 2/3 ruang, min-height 150px */
 .list { flex: 2; overflow-y: auto; padding: 8px; min-height: 150px; }
-
 .item { padding: 12px; border-radius: 10px; background: white; margin-bottom: 8px; border: 1px solid #e2e8f0; }
 .item-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
 .item-meta { font-size: 11px; color: var(--teks-muted); display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
@@ -48,6 +54,9 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .badge.tinggi { background: var(--merah); }
 .badge.sedang { background: var(--kuning); }
 .badge.rendah { background: var(--hijau); }
+.badge.besar { background: var(--merah); }
+.badge.kecil { background: var(--hijau); }
+.badge.fasilitas { background: var(--biru); }
 .badge-status { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
 .status-belum { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 .status-selesai { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
@@ -62,7 +71,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .btn-admin-acc { background: #3b82f6; color: white; border: 1px solid #2563eb; padding: 6px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; flex: 1; }
 .admin-actions { display: flex; gap: 6px; margin-top: 4px; }
 
-/* STYLE TITIK BULAT BERKEDIP */
+/* STYLE TITIK BULAT BERKEDIP (KRISIS) */
 .custom-div-icon { background: none !important; border: none !important; }
 .marker-pulse { width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; }
 .marker-pulse.tinggi { background: var(--merah); animation: pulse-merah 1.5s infinite; }
@@ -73,6 +82,13 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 @keyframes pulse-merah { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 @keyframes pulse-kuning { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
 @keyframes pulse-hijau { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
+/* STYLE IKON TEMPAT SAMPAH (FASILITAS) */
+.marker-fasilitas {
+  background: var(--biru); color: white; border-radius: 50%; width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
 
 .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; overflow: hidden; }
 .leaflet-popup-content { margin: 0; }
@@ -109,19 +125,18 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 #pickMapBtn { background: #fdf4ff; color: #a21caf; border: 1px solid #f5d0fe; padding: 8px; border-radius: 8px; font-size: 12px; width: 100%; cursor: pointer; margin-top: 4px; font-weight: bold; }
 #qrcode { display: flex; justify-content: center; margin: 20px 0; padding: 10px; background: white; border-radius: 12px; }
 
-/* STYLE INPUT PENDUDUK */
 .penduduk-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 .penduduk-row label { flex: 1; font-size: 12px; font-weight: bold; }
 .penduduk-row input { flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; text-align: right; }
 </style>
 </head>
-<body>
+<>
 
 <div id="app">
   <aside id="sidebar">
     <div class="brand">
-      <h1>🗺️ Peta Krisis Sampah</h1>
-      <p>Provinsi Gorontalo (Real-Time)</p>
+      <h1>♻️ SIGAP Sampah</h1>
+      <p>Sistem Informasi Geografis Pengelolaan Sampah</p>
     </div>
 
     <div class="stats">
@@ -147,6 +162,13 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
       </select>
     </div>
 
+    <!-- TOGGLE LAYER TAMPILAN -->
+    <div class="layer-toggle">
+      <input type="checkbox" id="toggleFasilitas" checked onchange="renderSemua(currentFilter)">
+      <label for="toggleFasilitas">Tampilkan Tempat Sampah (RT/RW)</label>
+    </div>
+
+    <button id="btnChoropleth" onclick="toggleChoropleth()">🗺️ Tampilkan Batas Wilayah</button>
     <button id="btnHeatmap" onclick="toggleHeatmap()">🔥 Tampilkan Peta Panas (Heatmap)</button>
 
     <button id="qrBtnSidebar" onclick="bukaQR()">📱 Bagikan Aplikasi (QR Code)</button>
@@ -157,14 +179,13 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
     <div class="list" id="list"></div>
 
     <div class="list-title" style="background:#e0f2fe; color:#0369a1; border-top: 2px solid #e2e8f0;">📊 Analisis Sampah vs Penduduk</div>
-    <!-- PERBAIKAN: Analisis mengambil porsi 1/3 ruang, min-height 150px -->
     <div id="analysis-panel" style="flex: 1; padding: 12px; font-size: 12px; background: white; overflow-y: auto; min-height: 150px;"></div>
   </aside>
 
   <button id="menuBtn">☰</button>
   <div id="map"></div>
   
-  <button id="laporBtn">+ Lapor Sampah</button>
+  <button id="laporBtn">+ Lapor / Tambah Data</button>
   
   <!-- MODAL LAPORAN -->
   <div id="modalLapor" class="modal-overlay">
@@ -173,8 +194,17 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
       <form id="formLaporan">
         <input type="hidden" id="editId" value="">
         
+        <!-- KATEGORI LAPORAN -->
         <div class="form-group">
-          <label>Nama Lokasi / TPS</label>
+          <label>Kategori Data</label>
+          <select id="inKategori" required onchange="ubahFormKategori()">
+            <option value="krisis">🚨 Krisis Sampah (Menumpuk)</option>
+            <option value="fasilitas">🗑️ Tambah Tempat Sampah (RT/RW)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label id="labelNama">Nama Lokasi / TPS</label>
           <input type="text" id="inNama" required placeholder="Contoh: TPS Pasar Sentral">
         </div>
         <div class="form-group">
@@ -198,18 +228,21 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
             <option value="Gorontalo Utara">Gorontalo Utara</option>
           </select>
         </div>
-        <div class="form-group">
+        
+        <div class="form-group" id="divJenisSampah">
           <label>Jenis Sampah</label>
           <input type="text" id="inJenis" required placeholder="Contoh: Plastik, Kertas, Campuran">
         </div>
-        <div class="form-group">
-          <label>Tingkat Kekritisan</label>
+        
+        <div class="form-group" id="divKritis">
+          <label id="labelKritis">Tingkat Kekritisan</label>
           <select id="inKritis" required>
             <option value="Tinggi">Tinggi (Merah)</option>
             <option value="Sedang">Sedang (Kuning)</option>
             <option value="Rendah">Rendah (Hijau)</option>
           </select>
         </div>
+
         <div class="form-group" id="divStatus" style="display:none;">
           <label>Status Penanganan (Khusus Admin)</label>
           <select id="inStatus">
@@ -217,8 +250,9 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
             <option value="Sudah Ditangani">Sudah Ditangani</option>
           </select>
         </div>
+        
         <div class="form-group">
-          <label>Foto Kondisi Sampah <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
+          <label>Foto <span id="labelFotoWajib" style="color:red;">(Wajib)</span></label>
           <input type="file" id="inFoto" accept="image/*" style="padding: 8px; background: #f8fafc;">
           <small id="infoFotoLama" style="display:none; color:#64748b; font-size:11px;">Biarkan kosong jika tidak ingin mengganti foto lama.</small>
         </div>
@@ -230,7 +264,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
           <label style="color:#b91c1c;">Verifikasi Anti-Bot: Berapa 3 + 4?</label>
           <input type="number" id="inVerifikasi" placeholder="Ketik jawabannya di sini">
         </div>
-        <button type="submit" class="btn-submit" id="btnKirimLaporan">Kirim Laporan</button>
+        <button type="submit" class="btn-submit" id="btnKirimLaporan">Kirim Data</button>
         <button type="button" class="btn-cancel" onclick="tutupModal()">Batal</button>
       </form>
     </div>
@@ -254,9 +288,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
     <div class="modal-content" style="text-align: left;">
       <h2 style="text-align: center;">⚙️ Kelola Data Penduduk</h2>
       <p style="font-size: 11px; color: #64748b; margin-bottom: 15px; text-align: center;">Ubah angka penduduk (jiwa). Data analisis akan ter-update otomatis.</p>
-      <div id="formPendudukContainer">
-        <!-- Form akan di-generate oleh JavaScript -->
-      </div>
+      <div id="formPendudukContainer"></div>
       <button type="button" class="btn-cancel" onclick="tutupKelolaPenduduk()" style="margin-top: 15px;">Tutup</button>
     </div>
   </div>
@@ -289,7 +321,9 @@ let petaMarkers = [];
 let isAdmin = false; 
 let tempMarker = null;
 let heatLayer = null;
+let choroplethLayer = null;
 let isHeatmapMode = false;
+let isChoroplethMode = false;
 
 let currentFilter = 'all';
 let currentSearch = '';
@@ -301,14 +335,145 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:
 
 const cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 });
 
-function buatMarker(titik) {
-  const warnaClass = (titik.is_approved === false) ? 'pending' : titik.kritis.toLowerCase();
+// ==========================================
+// FITUR BARU: CHOROPLETH (BATAS WILAYAH)
+// ==========================================
+async function toggleChoropleth() {
+  isChoroplethMode = !isChoroplethMode;
+  const btn = document.getElementById('btnChoropleth');
   
-  const icon = L.divIcon({
-    className: 'custom-div-icon',
-    html: `<div class="marker-pulse ${warnaClass}"></div>`,
-    iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10]
-  });
+  if (isChoroplethMode) {
+    btn.style.background = '#ef4444';
+    btn.innerHTML = '📍 Sembunyikan Batas Wilayah';
+    await muatChoropleth();
+  } else {
+    btn.style.background = '#8b5cf6';
+    btn.innerHTML = '🗺️ Tampilkan Batas Wilayah';
+    if (choroplethLayer) {
+      map.removeLayer(choroplethLayer);
+      choroplethLayer = null;
+    }
+  }
+}
+
+async function muatChoropleth() {
+  if (choroplethLayer) {
+    map.removeLayer(choroplethLayer);
+  }
+
+  try {
+    // MENGGUNAKAN CDN JSDELIVR (Jauh lebih stabil dari raw GitHub)
+    const urlGeoJSON = 'https://cdn.jsdelivr.net/gh/yusufsyaifudin/wilayah-indonesia@master/data/geoJSON/kabupaten/75.json';
+    
+    const response = await fetch(urlGeoJSON);
+    if (!response.ok) throw new Error('Gagal mengunduh data peta.');
+    
+    const geojsonData = await response.json();
+
+    let skorSampah = {};
+    const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori !== 'fasilitas');
+    approvedData.forEach(t => {
+      let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1);
+      skorSampah[t.wilayah] = (skorSampah[t.wilayah] || 0) + nilai;
+    });
+
+    choroplethLayer = L.geoJSON(geojsonData, {
+      style: function (feature) {
+        let namaGeo = feature.properties.name || feature.properties.NAME_2 || "";
+        let namaData = "";
+        for (let key in skorSampah) {
+          if (namaGeo.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(namaGeo.toLowerCase())) {
+            namaData = key;
+            break;
+          }
+        }
+
+        let skor = namaData ? skorSampah[namaData] : 0;
+        let penduduk = namaData ? (dataPenduduk[namaData] || 0) : 0;
+        let rasio = penduduk > 0 ? (skor / (penduduk / 100000)) : 0;
+        
+        let fillColor = '#e2e8f0';
+        if (rasio > 1.5) fillColor = '#ef4444';
+        else if (rasio > 0.5) fillColor = '#f59e0b';
+        else if (rasio > 0) fillColor = '#10b981';
+
+        return {
+          fillColor: fillColor, weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.6
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        let nama = feature.properties.name || feature.properties.NAME_2 || 'Wilayah';
+        layer.bindPopup(`<b>${nama}</b>`);
+      }
+    }).addTo(map);
+
+    map.fitBounds(choroplethLayer.getBounds());
+
+  } catch (error) {
+    console.error("Gagal memuat batas wilayah:", error);
+    alert("Gagal memuat peta batas wilayah. Pastikan internet stabil.");
+    isChoroplethMode = false;
+    const btn = document.getElementById('btnChoropleth');
+    btn.style.background = '#8b5cf6';
+    btn.innerHTML = '🗺️ Tampilkan Batas Wilayah';
+  }
+}
+
+// FUNGSI UNTUK MENGUBAH FORM SAAT KATEGORI DIGANTI
+function ubahFormKategori() {
+  const kat = document.getElementById('inKategori').value;
+  const selectKritis = document.getElementById('inKritis');
+  const labelKritis = document.getElementById('labelKritis');
+  const divJenis = document.getElementById('divJenisSampah');
+  const catatan = document.getElementById('inCatatan');
+  const labelNama = document.getElementById('labelNama');
+  const inNama = document.getElementById('inNama');
+
+  if (kat === 'fasilitas') {
+    divJenis.style.display = 'none';
+    document.getElementById('inJenis').required = false;
+    labelNama.innerText = "Nama Tempat Sampah / RT";
+    inNama.placeholder = "Contoh: Bak Sampah RT 05 / Depo RW 02";
+    labelKritis.innerText = "Ukuran Tempat Sampah";
+    selectKritis.innerHTML = `
+      <option value="Kecil">Kecil</option>
+      <option value="Sedang">Sedang</option>
+      <option value="Besar">Besar</option>
+    `;
+    catatan.placeholder = "Contoh: Kondisi bak rusak / butuh perbaikan";
+  } else {
+    divJenis.style.display = 'block';
+    document.getElementById('inJenis').required = true;
+    labelNama.innerText = "Nama Lokasi / TPS";
+    inNama.placeholder = "Contoh: TPS Pasar Sentral";
+    labelKritis.innerText = "Tingkat Kekritisan";
+    selectKritis.innerHTML = `
+      <option value="Tinggi">Tinggi (Merah)</option>
+      <option value="Sedang">Sedang (Kuning)</option>
+      <option value="Rendah">Rendah (Hijau)</option>
+    `;
+    catatan.placeholder = "Contoh: Sudah 3 hari belum diangkut";
+  }
+}
+
+function buatMarker(titik) {
+  const isFasilitas = titik.kategori === 'fasilitas';
+  const warnaClass = (titik.is_approved === false) ? 'pending' : (titik.kritis || 'rendah').toLowerCase();
+  
+  let icon;
+  if (isFasilitas) {
+    icon = L.divIcon({
+      className: 'custom-div-icon',
+      html: `<div class="marker-fasilitas">🗑️</div>`,
+      iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15]
+    });
+  } else {
+    icon = L.divIcon({
+      className: 'custom-div-icon',
+      html: `<div class="marker-pulse ${warnaClass}"></div>`,
+      iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -10]
+    });
+  }
 
   const fotoUrl = titik.foto ? titik.foto : 'https://via.placeholder.com/400x200?text=Foto+Belum+Ada';
   const statusClass = titik.status === 'Sudah Ditangani' ? 'status-selesai' : 'status-belum';
@@ -318,14 +483,26 @@ function buatMarker(titik) {
     pendingHTML = `<div class="popup-row"><span>Status Data</span><span class="badge-status status-pending">Menunggu Persetujuan</span></div>`;
   }
 
+  let popupContent = "";
+  if (isFasilitas) {
+    popupContent = `
+      <div class="popup-row"><span>Tipe</span><span class="badge fasilitas">Tempat Sampah</span></div>
+      <div class="popup-row"><span>Ukuran</span><span class="badge ${warnaClass === 'pending' ? 'sedang' : warnaClass}">${titik.kritis || '-'}</span></div>
+    `;
+  } else {
+    popupContent = `
+      <div class="popup-row"><span>Jenis</span><b>${titik.jenis || '-'}</b></div>
+      <div class="popup-row"><span>Kekritisan</span><span class="badge ${warnaClass === 'pending' ? 'sedang' : warnaClass}">${titik.kritis}</span></div>
+      <div class="popup-row"><span>Status</span><span class="badge-status ${statusClass}">${titik.status || 'Belum Ditangani'}</span></div>
+    `;
+  }
+
   const popupHTML = `
     <img class="popup-img" src="${fotoUrl}" onerror="this.src='https://via.placeholder.com/400x200?text=Foto+Error'">
     <div class="popup-body">
       <div class="popup-title">${titik.nama}</div>
       ${pendingHTML}
-      <div class="popup-row"><span>Jenis</span><b>${titik.jenis}</b></div>
-      <div class="popup-row"><span>Kekritisan</span><span class="badge ${warnaClass === 'pending' ? 'sedang' : warnaClass}">${titik.kritis}</span></div>
-      <div class="popup-row"><span>Status Penanganan</span><span class="badge-status ${statusClass}">${titik.status || 'Belum Ditangani'}</span></div>
+      ${popupContent}
       <div class="popup-row"><span>Wilayah</span><b>${titik.wilayah}</b></div>
       <div style="margin-top:8px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:11px;color:#64748b;font-style:italic">${titik.catatan || ''}</div>
     </div>`;
@@ -379,12 +556,17 @@ function renderSemua(filter = 'all') {
     );
   }
 
+  const showFasilitas = document.getElementById('toggleFasilitas').checked;
+  if (!showFasilitas) {
+    dataFilter = dataFilter.filter(t => t.kategori !== 'fasilitas');
+  }
+
   if (currentSort === 'nama_asc') {
     dataFilter.sort((a, b) => a.nama.localeCompare(b.nama));
   } else if (currentSort === 'nama_desc') {
     dataFilter.sort((a, b) => b.nama.localeCompare(a.nama));
   } else if (currentSort === 'kritis_tinggi') {
-    const levels = { 'Tinggi': 3, 'Sedang': 2, 'Rendah': 1 };
+    const levels = { 'Tinggi': 3, 'Sedang': 2, 'Rendah': 1, 'Besar': 3, 'Kecil': 1 };
     dataFilter.sort((a, b) => levels[b.kritis] - levels[a.kritis]);
   }
 
@@ -395,11 +577,16 @@ function renderSemua(filter = 'all') {
   if (isHeatmapMode) {
     map.removeLayer(cluster);
     if (heatLayer) map.removeLayer(heatLayer);
-    const heatData = dataFilter.map(t => {
-      let intensity = t.kritis === 'Tinggi' ? 1 : (t.kritis === 'Sedang' ? 0.6 : 0.3);
-      return [parseFloat(t.lat), parseFloat(t.lng), intensity];
-    });
-    heatLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 17 }).addTo(map);
+    
+    const krisisData = dataFilter.filter(t => t.kategori !== 'fasilitas');
+    
+    if (krisisData.length > 0) {
+      const heatData = krisisData.map(t => {
+        let intensity = t.kritis === 'Tinggi' ? 1 : (t.kritis === 'Sedang' ? 0.6 : 0.3);
+        return [parseFloat(t.lat), parseFloat(t.lng), intensity];
+      });
+      heatLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 17 }).addTo(map);
+    }
   } else {
     if (heatLayer) map.removeLayer(heatLayer);
     dataFilter.forEach((titik, index) => {
@@ -420,7 +607,7 @@ function renderSemua(filter = 'all') {
       if (titik.is_approved === false) {
         tombolAcc = `<button class="btn-admin-acc" onclick="setujuiData('${titik.id}')">✅ Setujui</button>`;
       } else {
-        if (titik.status !== 'Sudah Ditangani') {
+        if (titik.status !== 'Sudah Ditangani' && titik.kategori !== 'fasilitas') {
           tombolAcc = `<button class="btn-admin-selesai" onclick="tandaiSelesai('${titik.id}')">✅ Selesai</button>`;
         }
       }
@@ -435,13 +622,17 @@ function renderSemua(filter = 'all') {
     
     const statusClass = titik.status === 'Sudah Ditangani' ? 'status-selesai' : 'status-belum';
     const pendingHTML = (titik.is_approved === false) ? `<span class="badge-status status-pending">Pending</span>` : '';
+    
+    let badgeKategori = titik.kategori === 'fasilitas' 
+      ? `<span class="badge ${titik.kritis.toLowerCase()}">${titik.kritis}</span>` 
+      : `<span class="badge ${titik.kritis.toLowerCase()}">${titik.kritis}</span>`;
 
     div.innerHTML = `
       <div class="item-title">${titik.nama}</div>
       <div class="item-meta">
         ${pendingHTML}
-        <span class="badge ${titik.kritis.toLowerCase()}">${titik.kritis}</span>
-        <span class="badge-status ${statusClass}">${titik.status || 'Belum Ditangani'}</span>
+        ${badgeKategori}
+        ${titik.kategori !== 'fasilitas' ? `<span class="badge-status ${statusClass}">${titik.status || 'Belum Ditangani'}</span>` : ''}
       </div>
       <button class="btn-lihat" onclick="keLokasiMenu(${index})">🗺️ Lihat Lokasi di Peta</button>
       ${adminHTML}
@@ -450,10 +641,11 @@ function renderSemua(filter = 'all') {
   });
 
   updateStats();
+  if (isChoroplethMode) muatChoropleth(); // Update warna choropleth jika data berubah
 }
 
 function updateStats() {
-  const approvedData = dataTitik.filter(t => t.is_approved !== false);
+  const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori !== 'fasilitas');
   document.getElementById('statTinggi').textContent = approvedData.filter(t => t.kritis === 'Tinggi').length;
   document.getElementById('statSedang').textContent = approvedData.filter(t => t.kritis === 'Sedang').length;
   document.getElementById('statRendah').textContent = approvedData.filter(t => t.kritis === 'Rendah').length;
@@ -464,7 +656,7 @@ function renderAnalisis() {
   panel.innerHTML = '';
   let skorSampah = {};
   
-  const approvedData = dataTitik.filter(t => t.is_approved !== false);
+  const approvedData = dataTitik.filter(t => t.is_approved !== false && t.kategori !== 'fasilitas');
   
   approvedData.forEach(t => {
     let nilai = t.kritis === 'Tinggi' ? 3 : (t.kritis === 'Sedang' ? 2 : 1);
@@ -571,30 +763,24 @@ function tutupKelolaPenduduk() {
 
 async function simpanPenduduk(wilayah, nilaiBaru) {
   const jumlah = parseInt(nilaiBaru);
-  if (isNaN(jumlah) || jumlah < 0) {
-    alert("Masukkan angka yang valid!");
-    return;
-  }
+  if (isNaN(jumlah) || jumlah < 0) { alert("Masukkan angka yang valid!"); return; }
   try {
-    const { error } = await supabaseClient.from('data_penduduk')
-      .update({ jumlah_penduduk: jumlah })
-      .eq('nama_wilayah', wilayah);
+    const { error } = await supabaseClient.from('data_penduduk').update({ jumlah_penduduk: jumlah }).eq('nama_wilayah', wilayah);
     if (error) throw error;
     dataPenduduk[wilayah] = jumlah;
     renderAnalisis();
-  } catch (err) {
-    alert("Gagal menyimpan data penduduk: " + err.message);
-  }
+    if (isChoroplethMode) muatChoropleth(); // Update warna choropleth jika penduduk berubah
+  } catch (err) { alert("Gagal menyimpan data penduduk: " + err.message); }
 }
 
 /* ========================================================
    LOGIKA LAINNYA (ACC, EDIT, HAPUS, FORM)
    ======================================================== */
 async function setujuiData(id) {
-  if (!confirm("Setujui laporan ini agar muncul di peta publik?")) return;
+  if (!confirm("Setujui data ini agar muncul di peta publik?")) return;
   const { error } = await supabaseClient.from('titik_sampah').update({ is_approved: true }).eq('id', id);
   if (error) alert("Gagal: " + error.message);
-  else { alert("✅ Laporan disetujui."); ambilData(); }
+  else { alert("✅ Data disetujui."); ambilData(); }
 }
 
 async function tandaiSelesai(id) {
@@ -608,15 +794,24 @@ function bukaEdit(id) {
   const data = dataTitik.find(t => t.id == id);
   if (!data) return;
 
-  document.getElementById('judulForm').textContent = "✏️ Edit Laporan Sampah";
+  document.getElementById('judulForm').textContent = "✏️ Edit Data";
   document.getElementById('editId').value = data.id;
+  
+  document.getElementById('inKategori').value = data.kategori || 'krisis';
+  ubahFormKategori(); // Sesuaikan label form dan opsi dropdown
+  
   document.getElementById('inNama').value = data.nama;
   document.getElementById('inLat').value = data.lat;
   document.getElementById('inLng').value = data.lng;
   document.getElementById('inWilayah').value = data.wilayah;
-  document.getElementById('inJenis').value = data.jenis;
+  
+  if (data.kategori !== 'fasilitas') {
+    document.getElementById('inJenis').value = data.jenis;
+  }
+  
   document.getElementById('inKritis').value = data.kritis;
   document.getElementById('inCatatan').value = data.catatan;
+  
   document.getElementById('divStatus').style.display = 'block';
   document.getElementById('inStatus').value = data.status || 'Belum Ditangani';
   document.getElementById('divAntiBot').style.display = 'none';
@@ -638,6 +833,9 @@ document.getElementById('laporBtn').onclick = () => {
   document.getElementById('formLaporan').reset();
   document.getElementById('judulForm').textContent = "📝 Form Laporan Warga";
   document.getElementById('editId').value = "";
+  document.getElementById('inKategori').value = 'krisis';
+  ubahFormKategori();
+  
   document.getElementById('divAntiBot').style.display = 'block';
   document.getElementById('inVerifikasi').required = true;
   document.getElementById('inFoto').required = true;
@@ -665,7 +863,7 @@ function ambilLokasiGPS() {
 
 function mulaiPilihPeta() {
   document.getElementById('modalLapor').style.display = 'none';
-  alert("Silakan ketuk peta di lokasi sampah untuk mengambil koordinat.");
+  alert("Silakan ketuk peta di lokasi untuk mengambil koordinat.");
   document.getElementById('map').style.cursor = 'crosshair';
   map.once('click', function(e) {
     const lat = e.latlng.lat, lng = e.latlng.lng;
@@ -690,6 +888,8 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
 
   const btnSubmit = document.getElementById('btnKirimLaporan');
   const fileInput = document.getElementById('inFoto');
+  const kategori = document.getElementById('inKategori').value;
+  
   btnSubmit.textContent = 'Memproses...';
   btnSubmit.disabled = true;
 
@@ -718,8 +918,9 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
       lat: parseFloat(document.getElementById('inLat').value),
       lng: parseFloat(document.getElementById('inLng').value),
       wilayah: document.getElementById('inWilayah').value,
-      jenis: document.getElementById('inJenis').value,
+      jenis: kategori === 'fasilitas' ? "-" : document.getElementById('inJenis').value,
       kritis: document.getElementById('inKritis').value,
+      kategori: kategori,
       status: statusValue,
       is_approved: isApprovedValue,
       catatan: document.getElementById('inCatatan').value,
@@ -737,14 +938,14 @@ document.getElementById('formLaporan').onsubmit = async (e) => {
     }
 
     if (error) throw error;
-    alert(isEditMode ? "✅ Data diperbarui!" : (isAdmin ? "✅ Laporan Admin ditambahkan!" : "✅ Laporan dikirim! Menunggu ACC Admin."));
+    alert(isEditMode ? "✅ Data diperbarui!" : (isAdmin ? "✅ Data Admin ditambahkan!" : "✅ Data dikirim! Menunggu ACC Admin."));
     if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
     tutupModal();
     ambilData(); 
   } catch (error) {
     alert("❌ Gagal: " + error.message);
   } finally {
-    btnSubmit.textContent = 'Kirim Laporan';
+    btnSubmit.textContent = 'Kirim Data';
     btnSubmit.disabled = false;
   }
 };
@@ -772,9 +973,7 @@ async function ambilData() {
     const { data: dataPend, error: errPend } = await supabaseClient.from('data_penduduk').select('*');
     if (!errPend && dataPend) {
       dataPenduduk = {};
-      dataPend.forEach(item => {
-        dataPenduduk[item.nama_wilayah] = item.jumlah_penduduk;
-      });
+      dataPend.forEach(item => { dataPenduduk[item.nama_wilayah] = item.jumlah_penduduk; });
     }
 
     renderSemua(currentFilter);
@@ -794,5 +993,34 @@ supabaseClient.channel('schema-db-changes-penduduk')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'data_penduduk' }, payload => { ambilData(); })
   .subscribe();
 </script>
+  <!-- MENGAKTIFKAN SERVICE WORKER PWA -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(registration => {
+          console.log('Service Worker aktif:', registration.scope);
+        })
+        .catch(error => {
+          console.log('Service Worker gagal:', error);
+        });
+    });
+  }
+</script>
+  <!-- MENGAKTIFKAN SERVICE WORKER PWA -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(registration => {
+          console.log('Service Worker aktif:', registration.scope);
+        })
+        .catch(error => {
+          console.log('Service Worker gagal:', error);
+        });
+    });
+  }
+</script>
+
 </body>
 </html>
